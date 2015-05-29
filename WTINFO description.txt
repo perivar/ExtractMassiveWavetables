@@ -1,0 +1,9 @@
+The wtinfo file can be used to find out how many waves exisits in the wavetable.
+Divide the number of samples on the number specified by "SingeWAV"
+
+E.g.
+WT_Carbon2 snap2_1024.wav
+SingleWAV=1024
+numbers of samples = 6144
+
+Number of waves = 6144 / 1024 = 6
