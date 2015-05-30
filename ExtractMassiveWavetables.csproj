@@ -51,6 +51,15 @@
     <Compile Include="..\AudioVSTToolbox\CommonUtils\BinaryFile.cs">
       <Link>BinaryFile.cs</Link>
     </Compile>
+    <Compile Include="..\AudioVSTToolbox\CommonUtils\IOUtils.cs">
+      <Link>IOUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\AudioVSTToolbox\CommonUtils\NumberUtils.cs">
+      <Link>NumberUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\AudioVSTToolbox\CommonUtils\StringUtils.cs">
+      <Link>StringUtils.cs</Link>
+    </Compile>
     <Compile Include="MassiveDatFile.cs" />
     <Compile Include="MassiveMapping.cs" />
     <Compile Include="Program.cs" />

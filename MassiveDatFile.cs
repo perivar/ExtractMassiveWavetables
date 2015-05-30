@@ -64,23 +64,59 @@ namespace ExtractMassiveWavetables
 			return new Entry(name, entries);
 		}
 		
-		private static void extract_nimd_entry(BinaryFile bFile, Entry entry, string output_dir) {
+		private static void extract_nimd_entry(BinaryFile bFile, Entry entry, string base_output_dir, string output_dir, Dictionary<string, MassiveMapElement> map) {
 
 			string path = Path.Combine(output_dir, entry.Name);
 			
 			if (entry.IsList) {
-				if (!Directory.Exists(path)) {
-					Directory.CreateDirectory(path);
-				}
-				
 				foreach (var sub_entry in entry.Entries) {
-					extract_nimd_entry(bFile, sub_entry, path);
+					extract_nimd_entry(bFile, sub_entry, base_output_dir, path, map);
 				}
 			} else {
-				System.Console.Out.WriteLine("Creating file {0}.", path);
+				// get binary content
 				bFile.Seek(entry.DataOffset);
 				byte[] byteArray = bFile.ReadBytes(entry.DataSize);
+				
+				#region Output Original Filenames
+				// use path after the base dir as map key
+				string mapKey = IOUtils.GetRightPartOfPath(path, base_output_dir + Path.DirectorySeparatorChar);
+
+				// add all the original files into an Original directory
+				path = Path.Combine(base_output_dir, "Original", mapKey);
+
+				// create directory
+				string pathDirectory = Path.GetDirectoryName(path);
+				if (!Directory.Exists(pathDirectory)) {
+					Directory.CreateDirectory(pathDirectory);
+				}
+				
+				// write original file
+				System.Console.Out.WriteLine("Creating file {0}.", path);
 				BinaryFile.Write(path, byteArray);
+				#endregion
+				
+				#region Output Correct Filenames
+				// determine correct filename
+				if (map.ContainsKey(mapKey)) {
+					var mapElement = map[mapKey];
+					if (!mapElement.GroupName.Equals("")
+					    && !mapElement.CorrectFileName.Equals("")) {
+						
+						// group directory
+						string groupDirectory = Path.Combine(base_output_dir, "Correct Waveforms", StringUtils.MakeValidFileName(mapElement.GroupName));
+						
+						if (!Directory.Exists(groupDirectory)) {
+							Directory.CreateDirectory(groupDirectory);
+						}
+						
+						// output the corrected filenames
+						string newFileName = string.Format("{0}_{1}.wav", mapElement.GroupIndex, mapElement.CorrectFileName);
+						string newFilePath = Path.Combine(groupDirectory, newFileName);
+						System.Console.Out.WriteLine("Creating file {0}.", newFilePath);
+						BinaryFile.Write(newFilePath, byteArray);
+					}
+				}
+				#endregion
 			}
 		}
 		
@@ -95,12 +131,13 @@ namespace ExtractMassiveWavetables
 			if (File.Exists(tablesDatFilePath)) {
 				string fileName = Path.GetFileNameWithoutExtension(tablesDatFilePath);
 				
-				var mapping = new MassiveMapping("massive_map.csv");
+				// read in the map to save as NI Massive's GUI filenames
+				var map = MassiveMapping.ReadMassiveMapping("massive_map.csv");
 				
 				var bFile = new BinaryFile(tablesDatFilePath, BinaryFile.ByteOrder.LittleEndian);
 				Entry nimd = parse_nimd_file(bFile);
-				
-				extract_nimd_entry(bFile, nimd, outputDirPath);
+				extract_nimd_entry(bFile, nimd, outputDirPath, outputDirPath, map);
+
 				bFile.Close();
 				
 				return true;
@@ -166,5 +203,4 @@ namespace ExtractMassiveWavetables
 		}
 	}
 	#endregion
-	
 }

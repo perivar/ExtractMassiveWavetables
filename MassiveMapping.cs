@@ -1,70 +1,115 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ExtractMassiveWavetables
 {
 	/// <summary>
 	/// Description of MassiveMapping.
 	/// </summary>
-	public class MassiveMapping
+	public static class MassiveMapping
 	{
-		public Dictionary<string, KeyValues> Tables {
-			get;
-			set;
-		}
-		
-		public MassiveMapping(string filePath)
+		/// <summary>
+		/// Read in a map from the original filenames to the ones NI uses themselves in the GUI
+		/// </summary>
+		/// <param name="filePath">filepath to the mapping csv file</param>
+		/// <returns>a map</returns>
+		public static Dictionary<string, MassiveMapElement> ReadMassiveMapping(string filePath)
 		{
-			Tables = new Dictionary<string, KeyValues>();
-
-			using (var reader = new StreamReader(filePath))
+			var collection = from line in File.ReadAllLines(filePath).Skip(1)
+				let columns = line.Split(',')
+				select new MassiveMapElement
 			{
-				// First line contains column names.
-				var columnNames = reader.ReadLine().Split(',');
-				for(int i = 1; i < columnNames.Length; ++i)
-				{
-					var columnName = columnNames[i];
-					Tables.Add(columnName, new KeyValues(columnName));
-				}
-
-				var line = reader.ReadLine();
-				while (line != null)
-				{
-					var columns = line.Split(',');
-
-					for (int i = 1; i < columns.Length; ++i)
-					{
-						var table = Tables[columnNames[i]];
-						table.AddValue(columns[0], columns[i]);
-					}
-
-					line = reader.ReadLine();
-				}
-			}
+				Index = int.Parse(columns[0]),
+				OrigFilePath = columns[1],
+				OrigFileName = columns[2],
+				CorrectFileName = columns[3],
+				GroupName = columns[4],
+				GroupIndex = CommonUtils.NumberUtils.IntTryParse(columns[5], -1),
+				Comment = columns[6]
+			};
+			
+			return collection.ToDictionary( t => t.OrigFilePath, t => t);
 		}
 	}
 	
-	
-	public class KeyValues
-	{
-		private Dictionary<string, string> _values = new Dictionary<string, string>();
-		private String _key;
+	public class MassiveMapElement {
+		int index;
+		string origFilePath;
+		string origFileName;
+		string correctFileName;
+		string groupName;
+		int groupIndex;
+		string comment;
 
-		public KeyValues(String key)
-		{
-			_key = key;
+		public int Index {
+			get {
+				return index;
+			}
+			set {
+				index = value;
+			}
 		}
 
-		public void AddValue(string key, string value)
-		{
-			_values.Add(key, value);
+		public string OrigFilePath {
+			get {
+				return origFilePath;
+			}
+			set {
+				origFilePath = value;
+			}
+		}
+
+		public string OrigFileName {
+			get {
+				return origFileName;
+			}
+			set {
+				origFileName = value;
+			}
+		}
+
+		public string CorrectFileName {
+			get {
+				return correctFileName;
+			}
+			set {
+				correctFileName = value;
+			}
+		}
+
+		public string GroupName {
+			get {
+				return groupName;
+			}
+			set {
+				groupName = value;
+			}
+		}
+
+		public int GroupIndex {
+			get {
+				return groupIndex;
+			}
+			set {
+				groupIndex = value;
+			}
+		}
+
+		public string Comment {
+			get {
+				return comment;
+			}
+			set {
+				comment = value;
+			}
 		}
 		
 		public override string ToString()
 		{
-			return string.Format("Key: {0}. Count: {1}", _key, _values.Count);
+			return string.Format("[{0}] '{1}' => '{2}'", index, origFileName, correctFileName);
 		}
+		
 	}
-
 }
