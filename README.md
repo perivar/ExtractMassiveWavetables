@@ -1,6 +1,6 @@
 # ExtractMassiveWavetables
 
-## Extract tfiles from Native Instruments Massive tables.dat file
+## Extract files from Native Instruments Massive tables.dat file
 This is ported over from python to c#
 https://gist.github.com/lalinsky/8f2cd9e8f80e62c82af2
 all credits goes to *Lukáš Lalinský*
@@ -18,4 +18,6 @@ Read here for more info:
 http://www.reddit.com/r/edmproduction/comments/2d2op8/massive_wavetables_list_info/
 
 Enjoy!
+
+Kind Regards,
 Per Ivar Nerseth
