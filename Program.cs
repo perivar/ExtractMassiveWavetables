@@ -4,7 +4,7 @@ namespace ExtractMassiveWavetables
 {
 	class Program
 	{
-		const string _version = "0.2";
+		const string _version = "0.3";
 		
 		public static void Main(string[] args)
 		{
